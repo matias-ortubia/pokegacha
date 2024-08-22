@@ -3,13 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <title></title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <button id="singlePullButton">x1 Pull</button>
-    <button id="multiPullButton">x10 Pull</button>
-    <button id="showObtainedPokemonButton">Obtained Pokemon</button>
-    <div id="pokemonContainer"></div>
-    
+    <main>
+        <div class="buttonsContainer">
+            <button id="singlePullButton" class="button pull">x1 Pull</button>
+            <button id="multiPullButton" class="button pull">x10 Pull</button>
+            <button id="showObtainedPokemonButton" class="button secondary">Obtained Pokemon</button>
+        </div>
+        <div id="pkmListContainer"></div>
+    </main>
     
     <script src="script.js"></script>
 </body>
