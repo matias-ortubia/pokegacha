@@ -4,10 +4,10 @@ const MAX_POKEMON = 150;
 
 const multiPullButton = document.getElementById("multiPullButton");
 const singlePullButton = document.getElementById("singlePullButton");
-const showObtainedPokemonButton = document.getElementById("showObtainedPokemonButton");
-const pkmListContainer = document.getElementById("pkmListContainer");
+const showObtainedPkmnButton = document.getElementById("showObtainedPokemonButton");
+const pkmnListContainer = document.getElementById("pkmnListContainer");
 
-const pkmColorByTypes = {
+const pkmnColorByTypes = {
     "BUG": "#88950c",
     "DARK": "#3a2c21",
     "DRAGON": "#755ddf",
@@ -28,88 +28,101 @@ const pkmColorByTypes = {
     "WATER": "#0d67c0"
 };
 
-const obtainedPokemonList = [];
+const obtainedPkmnList = [];
 
-const getRandomPokemon = async () => {
+const getRandomPkmn = async () => {
     const randomNum = Math.floor(Math.random() * MAX_POKEMON) + 1;
     const url = "https://pokeapi.co/api/v2/pokemon/" + randomNum.toString();
-    const obtainedPokemon = await fetch(url).then(response => response.json());
-    const alreadyObtainedPkm = obtainedPokemonList.find(pkm => pkm.name.toLowerCase() === obtainedPokemon.name.toLowerCase());
-    const pokemonData = {
-        name: obtainedPokemon.name,
-        types: obtainedPokemon.types,
-        img: obtainedPokemon.sprites.front_default,
+    const obtainedPkmn = await fetch(url).then(response => response.json());
+    const alreadyObtainedPkm = obtainedPkmnList.find(pkmn => pkmn.name.toLowerCase() === obtainedPkmn.name.toLowerCase());
+    const pkmnData = {
+        name: obtainedPkmn.name,
+        types: obtainedPkmn.types,
+        img: obtainedPkmn.sprites.front_default,
         quantity: 1
     };
-    const pokemon = alreadyObtainedPkm ?? pokemonData;
+    const pkmn = alreadyObtainedPkm ?? pkmnData;
     if (alreadyObtainedPkm) {
-        pokemon.quantity += 1;
+        pkmn.quantity += 1;
         alreadyObtainedPkm.quantity += 1;
     } else {
-        obtainedPokemonList.push({...pokemon});
+        obtainedPkmnList.push({...pkmn});
     }
-    return pokemon;
+    savePkmnListToLocalStorage();
+    return pkmn;
 };
 
-const getRandomPokemonList = async () => {
-    const pokemonList = [];
+const getRandomPkmnList = async () => {
+    const pkmnList = [];
     for (let i = 0; i < 10; i++) {
-        const pokemon = await getRandomPokemon();
-        pokemonList.push(pokemon);
+        const pkmn = await getRandomPkmn();
+        pkmnList.push(pkmn);
     }
-    return pokemonList;
+    return pkmnList;
 };
 
-const renderPokemon = (pokemon) => {
-    const newPokemonContainer = document.createElement("div");
-    newPokemonContainer.className = "pkmContainer";
-    newPokemonContainer.style.backgroundColor = getColorByType(pokemon.types[0].type.name)
+const renderPkmn = (pkmn) => {
+    const newPkmnContainer = document.createElement("div");
+    newPkmnContainer.className = "pkmnContainer";
+    newPkmnContainer.style.backgroundColor = getColorByType(pkmn.types[0].type.name)
 
-    const newPokemonName = document.createElement("h5");
-    newPokemonName.className = "pkmName";
-    newPokemonName.innerHTML = pokemon.name + " x" + pokemon.quantity;
-    newPokemonContainer.appendChild(newPokemonName);
+    const newPkmnName = document.createElement("h5");
+    newPkmnName.className = "pkmnName";
+    newPkmnName.innerHTML = pkmn.name + " x" + pkmn.quantity;
+    newPkmnContainer.appendChild(newPkmnName);
 
-    const newPokemonImg = document.createElement("img");
-    newPokemonImg.className = "pkmImg";
-    newPokemonImg.src = pokemon.img;
-    newPokemonContainer.appendChild(newPokemonImg);
+    const newPkmnImg = document.createElement("img");
+    newPkmnImg.className = "pkmnImg";
+    newPkmnImg.src = pkmn.img;
+    newPkmnContainer.appendChild(newPkmnImg);
 
-    pkmListContainer.appendChild(newPokemonContainer);
+    pkmnListContainer.appendChild(newPkmnContainer);
 };
 
-const renderPokemonList = (pokemonList) => {
-    pokemonList.forEach(pokemon => renderPokemon(pokemon));
+const renderPkmnList = (pkmnList) => {
+    pkmnList.forEach(pkmn => renderPkmn(pkmn));
 };
 
 const handleSinglePull = () => {
-    clearShownPokemon();
-    getRandomPokemon().then(pokemon => renderPokemon(pokemon));
+    clearShownPkmn();
+    getRandomPkmn().then(pkmn => renderPkmn(pkmn));
 };
 
 const handleMultiPull = () => {
-    clearShownPokemon();
-    getRandomPokemonList().then(pokemonList => renderPokemonList(pokemonList));
+    clearShownPkmn();
+    getRandomPkmnList().then(pkmnList => renderPkmnList(pkmnList));
 };
 
-const clearShownPokemon = () => {
-    while(pkmListContainer.firstChild) {
-        pkmListContainer.removeChild(pkmListContainer.lastChild);
+const clearShownPkmn = () => {
+    while(pkmnListContainer.firstChild) {
+        pkmnListContainer.removeChild(pkmnListContainer.lastChild);
     }
 };
 
-const showObtainedPokemon = () => {
-    clearShownPokemon();
-    obtainedPokemonList.forEach(pokemon => renderPokemon(pokemon));
+const showObtainedPkmn = () => {
+    clearShownPkmn();
+    obtainedPkmnList.forEach(pkmn => renderPkmn(pkmn));
 };
 
 function getColorByType(type) {
-    return pkmColorByTypes[type.toUpperCase()];
-};
+    return pkmnColorByTypes[type.toUpperCase()];
+}
 
+function savePkmnListToLocalStorage() {
+    localStorage.setItem("obtainedPkmnList", JSON.stringify(obtainedPkmnList))
+}
+
+function loadPkmnListFromLocalStorage() {
+    const obtainedList = localStorage.getItem("obtainedPkmnList");
+    if (obtainedList) {
+        obtainedPkmnList.push(...JSON.parse(obtainedList));
+    }
+}
+
+loadPkmnListFromLocalStorage();
 singlePullButton.addEventListener("click", handleSinglePull);
 multiPullButton.addEventListener("click", handleMultiPull);
-showObtainedPokemonButton.addEventListener("click", showObtainedPokemon);
+showObtainedPkmnButton.addEventListener("click", showObtainedPkmn);
 
 // Para probar, borrar despues
 handleMultiPull();
