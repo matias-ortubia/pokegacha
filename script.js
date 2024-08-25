@@ -39,6 +39,7 @@ const getRandomPkmn = async () => {
         name: obtainedPkmn.name,
         types: obtainedPkmn.types,
         img: obtainedPkmn.sprites.front_default,
+        moves: resolvePkmnMoves(obtainedPkmn.moves),
         quantity: 1
     };
     const pkmn = alreadyObtainedPkm ?? pkmnData;
@@ -76,6 +77,18 @@ const renderPkmn = (pkmn) => {
     newPkmnImg.src = pkmn.img;
     newPkmnContainer.appendChild(newPkmnImg);
 
+    const newPkmnMovesContainer = document.createElement("ul");
+    newPkmnMovesContainer.className = "movesContainer";
+    if (pkmn.moves) {
+        pkmn.moves.forEach(move => {
+            const moveElement = document.createElement("li");
+            moveElement.className = "pkmnMove";
+            moveElement.innerHTML = move?.move?.name ?? " ";
+            newPkmnMovesContainer.appendChild(moveElement);
+        });
+    }
+    newPkmnContainer.appendChild(newPkmnMovesContainer);
+
     pkmnListContainer.appendChild(newPkmnContainer);
 };
 
@@ -103,6 +116,16 @@ const showObtainedPkmn = () => {
     clearShownPkmn();
     obtainedPkmnList.forEach(pkmn => renderPkmn(pkmn));
 };
+
+function resolvePkmnMoves(moves) {
+    const movesQty = 4;
+    const movesCopy = [...moves];
+    for (let i = movesCopy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [movesCopy[i], movesCopy[j]] = [movesCopy[j], movesCopy[i]];
+    }
+    return movesCopy.slice(0, movesQty);
+}
 
 function getColorByType(type) {
     return pkmnColorByTypes[type.toUpperCase()];
