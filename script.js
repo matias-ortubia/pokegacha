@@ -1,6 +1,8 @@
 "use strict"
 
-const MAX_POKEMON = 150;
+const MAX_POKEMON = 151;
+const CACHE_KEY_PREFIX = "cachedPkmn_";
+const SHINY_CHANCE = 4096;
 
 const multiPullButton = document.getElementById("multiPullButton");
 const singlePullButton = document.getElementById("singlePullButton");
@@ -30,25 +32,48 @@ const pkmnColorByTypes = {
 
 const obtainedPkmnList = [];
 
+const buildPkmnForCache = (pkmn) => {
+    return {
+        id: pkmn.id,
+        name: pkmn.name,
+        types: pkmn.types,
+        moves: pkmn.moves.map(move => move.move),
+        sprites: pkmn.sprites
+    };
+};
+
+const buildPkmn = (pkmn, moves, isShiny) => {
+    return {
+        id: pkmn.id,
+        name: pkmn.name,
+        types: pkmn.types,
+        moves: moves,
+        img: isShiny ? pkmn.sprites.front_shiny : pkmn.sprites.front_default
+    };
+};
+
+async function fetchPkmn(id) {
+    const url = "https://pokeapi.co/api/v2/pokemon/" + id.toString();
+    return await fetch(url).then(response => response.json());
+}
+
 const getRandomPkmn = async () => {
     const randomNum = Math.floor(Math.random() * MAX_POKEMON) + 1;
-    const url = "https://pokeapi.co/api/v2/pokemon/" + randomNum.toString();
-    const obtainedPkmn = await fetch(url).then(response => response.json());
-    const alreadyObtainedPkm = obtainedPkmnList.find(pkmn => pkmn.name.toLowerCase() === obtainedPkmn.name.toLowerCase());
-    const pkmnData = {
-        name: obtainedPkmn.name,
-        types: obtainedPkmn.types,
-        img: obtainedPkmn.sprites.front_default,
-        moves: resolvePkmnMoves(obtainedPkmn.moves),
-        quantity: 1
-    };
-    const pkmn = alreadyObtainedPkm ?? pkmnData;
-    if (alreadyObtainedPkm) {
-        pkmn.quantity += 1;
-        alreadyObtainedPkm.quantity += 1;
+    const isShiny = Math.floor(Math.random() * SHINY_CHANCE) == 0;
+    const cacheKey = CACHE_KEY_PREFIX + randomNum;
+
+    const cachedPkmn = JSON.parse(localStorage.getItem(cacheKey));
+    let pkmn;
+    if (cachedPkmn) {
+        const moves = resolvePkmnMoves(cachedPkmn.moves);
+        pkmn = buildPkmn(cachedPkmn, moves, isShiny);
     } else {
-        obtainedPkmnList.push({...pkmn});
+        const obtainedPkmn = await fetchPkmn(randomNum);
+        const moves = resolvePkmnMoves(obtainedPkmn.moves).map(move => move.move);
+        cachePkmn(buildPkmnForCache(obtainedPkmn), cacheKey);
+        pkmn = buildPkmn(obtainedPkmn, moves, isShiny);
     }
+    obtainedPkmnList.push({...pkmn});
     savePkmnListToLocalStorage();
     return pkmn;
 };
@@ -69,7 +94,7 @@ const renderPkmn = (pkmn) => {
 
     const newPkmnName = document.createElement("h5");
     newPkmnName.className = "pkmnName";
-    newPkmnName.innerHTML = pkmn.name + " x" + pkmn.quantity;
+    newPkmnName.innerHTML = pkmn.name;
     newPkmnContainer.appendChild(newPkmnName);
 
     const newPkmnImg = document.createElement("img");
@@ -83,7 +108,7 @@ const renderPkmn = (pkmn) => {
         pkmn.moves.forEach(move => {
             const moveElement = document.createElement("li");
             moveElement.className = "pkmnMove";
-            moveElement.innerHTML = move?.move?.name ?? " ";
+            moveElement.innerHTML = move?.name ?? " ";
             newPkmnMovesContainer.appendChild(moveElement);
         });
     }
@@ -141,6 +166,34 @@ function loadPkmnListFromLocalStorage() {
         obtainedPkmnList.push(...JSON.parse(obtainedList));
     }
 }
+
+function cachePkmn(pkmn, cacheKey) {
+    const pkmnData = {
+        name: pkmn.name,
+        types: pkmn.types,
+        sprites: pkmn.sprites,
+        moves: pkmn.moves
+    };
+
+    localStorage.setItem(cacheKey, JSON.stringify(pkmnData));
+}
+
+function areMovesEqual(savedPkmn, obtainedPkmn) {
+    if (arr1.length !== arr2.length) return false;
+    const savedPkmnSorted = savedPkmn.slice().sort();
+    const obtainedPkmnSorted = obtainedPkmn.slice().sort();
+    return savedPkmnSorted.every((val, index) => val === obtainedPkmnSorted[index]);
+} 
+
+function isPkmnAlreadyObtained(alreadyObtainedPkmnList, moves, isShiny) {
+    const obtainedPkmnMoves = moves.slice().sort();
+    return alreadyObtainedPkmnList.some(pkmn => {
+        if(obtainedPkmnMoves.every((val, index) => pkmn.moves.slice().sort()[index])) {
+            return pkmn.isShiny === isShiny;
+        }
+    });
+}
+
 
 loadPkmnListFromLocalStorage();
 singlePullButton.addEventListener("click", handleSinglePull);
