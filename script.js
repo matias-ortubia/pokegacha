@@ -38,6 +38,7 @@ const buildPkmnForCache = (pkmn) => {
         name: pkmn.name,
         types: pkmn.types,
         moves: pkmn.moves.map(move => move.move),
+        abilities: pkmn.abilities,
         sprites: pkmn.sprites
     };
 };
@@ -48,7 +49,9 @@ const buildPkmn = (pkmn, moves, isShiny) => {
         name: pkmn.name,
         types: pkmn.types,
         moves: moves,
-        img: isShiny ? pkmn.sprites.front_shiny : pkmn.sprites.front_default
+        ability: resolvePkmnAbility(pkmn.abilities),
+        img: isShiny ? pkmn.sprites.front_shiny : pkmn.sprites.front_default,
+        isShiny: isShiny
     };
 };
 
@@ -94,13 +97,18 @@ const renderPkmn = (pkmn) => {
 
     const newPkmnName = document.createElement("h5");
     newPkmnName.className = "pkmnName";
-    newPkmnName.innerHTML = pkmn.name;
+    newPkmnName.innerHTML = pkmn.name + (pkmn.isShiny ? "��" : "");
     newPkmnContainer.appendChild(newPkmnName);
 
     const newPkmnImg = document.createElement("img");
     newPkmnImg.className = "pkmnImg";
     newPkmnImg.src = pkmn.img;
     newPkmnContainer.appendChild(newPkmnImg);
+
+    const newPkmnAbility = document.createElement("p");
+    newPkmnAbility.className = "ability";
+    newPkmnAbility.innerHtml = pkmn.ability;
+    newPkmnContainer.appendChild(newPkmnAbility)
 
     const newPkmnMovesContainer = document.createElement("ul");
     newPkmnMovesContainer.className = "movesContainer";
@@ -152,6 +160,11 @@ function resolvePkmnMoves(moves) {
     return movesCopy.slice(0, movesQty);
 }
 
+function resolvePkmnAbility(abilities) {
+    const index = Math.floor(Math.random() * abilities.length);
+    return abilities[index];
+}
+
 function getColorByType(type) {
     return pkmnColorByTypes[type.toUpperCase()];
 }
@@ -172,7 +185,8 @@ function cachePkmn(pkmn, cacheKey) {
         name: pkmn.name,
         types: pkmn.types,
         sprites: pkmn.sprites,
-        moves: pkmn.moves
+        moves: pkmn.moves,
+        abilities: pkmn.abilities
     };
 
     localStorage.setItem(cacheKey, JSON.stringify(pkmnData));
