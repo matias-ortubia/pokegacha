@@ -1,8 +1,7 @@
 "use strict"
 
-const MAX_POKEMON = 151;
-const CACHE_KEY_PREFIX = "cachedPkmn_";
-const SHINY_CHANCE = 4096;
+import { getRandomPkmn, getRandomPkmnList } from "./client/pokeapiClient.js";
+import { getPkmnListFromLocalStorage, savePkmnListToLocalStorage } from "./utils/pkmnCacheHelper.js";
 
 const multiPullButton = document.getElementById("multiPullButton");
 const singlePullButton = document.getElementById("singlePullButton");
@@ -32,63 +31,6 @@ const pkmnColorByTypes = {
 
 const obtainedPkmnList = [];
 
-const buildPkmnForCache = (pkmn) => {
-    return {
-        id: pkmn.id,
-        name: pkmn.name,
-        types: pkmn.types,
-        moves: pkmn.moves.map(move => move.move),
-        abilities: pkmn.abilities,
-        sprites: pkmn.sprites
-    };
-};
-
-const buildPkmn = (pkmn, moves, isShiny) => {
-    return {
-        id: pkmn.id,
-        name: pkmn.name,
-        types: pkmn.types,
-        moves: moves,
-        ability: resolvePkmnAbility(pkmn.abilities),
-        img: isShiny ? pkmn.sprites.front_shiny : pkmn.sprites.front_default,
-        isShiny: isShiny
-    };
-};
-
-async function fetchPkmn(id) {
-    const url = "https://pokeapi.co/api/v2/pokemon/" + id.toString();
-    return await fetch(url).then(response => response.json());
-}
-
-const getRandomPkmn = async () => {
-    const randomNum = Math.floor(Math.random() * MAX_POKEMON) + 1;
-    const isShiny = Math.floor(Math.random() * SHINY_CHANCE) == 0;
-    const cacheKey = CACHE_KEY_PREFIX + randomNum;
-
-    const cachedPkmn = JSON.parse(localStorage.getItem(cacheKey));
-    let pkmn;
-    if (cachedPkmn) {
-        const moves = resolvePkmnMoves(cachedPkmn.moves);
-        pkmn = buildPkmn(cachedPkmn, moves, isShiny);
-    } else {
-        const obtainedPkmn = await fetchPkmn(randomNum);
-        const moves = resolvePkmnMoves(obtainedPkmn.moves).map(move => move.move);
-        cachePkmn(buildPkmnForCache(obtainedPkmn), cacheKey);
-        pkmn = buildPkmn(obtainedPkmn, moves, isShiny);
-    }
-    obtainedPkmnList.push({...pkmn});
-    savePkmnListToLocalStorage();
-    return pkmn;
-};
-
-const getRandomPkmnList = async () => {
-    const pkmnList = [];
-    for (let i = 0; i < 10; i++) {
-        const pkmn = await getRandomPkmn();
-        pkmnList.push(pkmn);
-    }
-    return pkmnList;
-};
 
 const renderPkmn = (pkmn) => {
     const newPkmnContainer = document.createElement("div");
@@ -131,12 +73,20 @@ const renderPkmnList = (pkmnList) => {
 
 const handleSinglePull = () => {
     clearShownPkmn();
-    getRandomPkmn().then(pkmn => renderPkmn(pkmn));
+    getRandomPkmn().then(pkmn => {
+        renderPkmn(pkmn);
+        obtainedPkmnList.push({...pkmn});
+        savePkmnListToLocalStorage(obtainedPkmnList);
+    });
 };
 
 const handleMultiPull = () => {
     clearShownPkmn();
-    getRandomPkmnList().then(pkmnList => renderPkmnList(pkmnList));
+    getRandomPkmnList().then(pkmnList => {
+        renderPkmnList(pkmnList);
+        obtainedPkmnList.push(...pkmnList);
+        savePkmnListToLocalStorage(obtainedPkmnList);
+    });
 };
 
 const clearShownPkmn = () => {
@@ -150,64 +100,16 @@ const showObtainedPkmn = () => {
     obtainedPkmnList.forEach(pkmn => renderPkmn(pkmn));
 };
 
-function resolvePkmnMoves(moves) {
-    const movesQty = 4;
-    const movesCopy = [...moves];
-    for (let i = movesCopy.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [movesCopy[i], movesCopy[j]] = [movesCopy[j], movesCopy[i]];
-    }
-    return movesCopy.slice(0, movesQty);
-}
-
-function resolvePkmnAbility(abilities) {
-    const index = Math.floor(Math.random() * abilities.length);
-    return abilities[index];
-}
-
 function getColorByType(type) {
     return pkmnColorByTypes[type.toUpperCase()];
 }
 
-function savePkmnListToLocalStorage() {
-    localStorage.setItem("obtainedPkmnList", JSON.stringify(obtainedPkmnList))
-}
-
 function loadPkmnListFromLocalStorage() {
-    const obtainedList = localStorage.getItem("obtainedPkmnList");
-    if (obtainedList) {
+    const obtainedList = getPkmnListFromLocalStorage();
+    if (!!obtainedList) {
         obtainedPkmnList.push(...JSON.parse(obtainedList));
     }
 }
-
-function cachePkmn(pkmn, cacheKey) {
-    const pkmnData = {
-        name: pkmn.name,
-        types: pkmn.types,
-        sprites: pkmn.sprites,
-        moves: pkmn.moves,
-        abilities: pkmn.abilities
-    };
-
-    localStorage.setItem(cacheKey, JSON.stringify(pkmnData));
-}
-
-function areMovesEqual(savedPkmn, obtainedPkmn) {
-    if (arr1.length !== arr2.length) return false;
-    const savedPkmnSorted = savedPkmn.slice().sort();
-    const obtainedPkmnSorted = obtainedPkmn.slice().sort();
-    return savedPkmnSorted.every((val, index) => val === obtainedPkmnSorted[index]);
-} 
-
-function isPkmnAlreadyObtained(alreadyObtainedPkmnList, moves, isShiny) {
-    const obtainedPkmnMoves = moves.slice().sort();
-    return alreadyObtainedPkmnList.some(pkmn => {
-        if(obtainedPkmnMoves.every((val, index) => pkmn.moves.slice().sort()[index])) {
-            return pkmn.isShiny === isShiny;
-        }
-    });
-}
-
 
 loadPkmnListFromLocalStorage();
 singlePullButton.addEventListener("click", handleSinglePull);
