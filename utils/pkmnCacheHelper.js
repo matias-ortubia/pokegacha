@@ -1,14 +1,17 @@
-
+import { getPkmnEvolutions, getPkmnPreEvolution, getPkmnEvolutionStage} from "./evolutionChainHelper.js";
 
 export const CACHE_KEY_PREFIX = "cachedPkmn_";
 
-const buildPkmnForCache = (pkmn) => {
+const buildPkmnForCache = (pkmn, evolutionChain) => {
     return {
         id: pkmn.id,
         name: pkmn.name,
         types: pkmn.types,
         moves: pkmn.moves.map(move => move.move),
         abilities: pkmn.abilities,
+        evolutions: getPkmnEvolutions(evolutionChain, pkmn.name),
+        preEvolution: getPkmnPreEvolution(evolutionChain, pkmn.name),
+        evolutionStage: getPkmnEvolutionStage(evolutionChain, pkmn.name),
         sprites: pkmn.sprites
     };
 };
@@ -26,15 +29,18 @@ export function getPkmnListFromLocalStorage() {
     return localStorage.getItem("obtainedPkmnList");
 }
 
-export function cachePkmn(pkmn, pkmnId) {
+export function cachePkmn(pkmn, evolutionChain, pkmnId) {
     const cacheKey = CACHE_KEY_PREFIX + pkmnId;
-    const pkmnForCache = buildPkmnForCache(pkmn);
+    const pkmnForCache = buildPkmnForCache(pkmn, evolutionChain);
     const pkmnData = {
         name: pkmnForCache.name,
         types: pkmnForCache.types,
-        sprites: pkmnForCache.sprites,
         moves: pkmnForCache.moves,
-        abilities: pkmnForCache.abilities
+        abilities: pkmnForCache.abilities,
+        evolutions: pkmnForCache.evolutions,
+        preEvolution: pkmnForCache.preEvolution,
+        evolutionStage: pkmnForCache.evolutionStage,
+        sprites: pkmnForCache.sprites
     };
 
     localStorage.setItem(cacheKey, JSON.stringify(pkmnData));
