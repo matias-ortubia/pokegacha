@@ -11,7 +11,7 @@ const buildPkmn = (pkmn, moves, preEvolution, evolutions, evolutionStage, isShin
         name: pkmn.name,
         types: pkmn.types,
         moves: moves,
-        ability: resolvePkmnAbility(pkmn.abilities),
+        ability: resolvePkmnAbility(pkmn.abilities).ability.name,
         img: isShiny ? pkmn.sprites.front_shiny : pkmn.sprites.front_default,
         evolutions: evolutions,
         preEvolution: preEvolution,

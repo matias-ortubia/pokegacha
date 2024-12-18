@@ -47,10 +47,14 @@ const renderPkmn = (pkmn) => {
     newPkmnImg.src = pkmn.img;
     newPkmnContainer.appendChild(newPkmnImg);
 
+    const newPkmnAbilityContainer = document.createElement("div");
+    newPkmnAbilityContainer.className = "abilityContainer";
+
     const newPkmnAbility = document.createElement("p");
-    newPkmnAbility.className = "ability";
-    newPkmnAbility.innerHtml = pkmn.ability;
-    newPkmnContainer.appendChild(newPkmnAbility)
+    newPkmnAbility.className = "abilityName";
+    newPkmnAbility.innerHTML = formatAbilityName(pkmn.ability);
+    newPkmnAbilityContainer.appendChild(newPkmnAbility);
+    newPkmnContainer.appendChild(newPkmnAbilityContainer);
 
     const newPkmnMovesContainer = document.createElement("ul");
     newPkmnMovesContainer.className = "movesContainer";
@@ -66,6 +70,13 @@ const renderPkmn = (pkmn) => {
 
     pkmnListContainer.appendChild(newPkmnContainer);
 };
+
+function formatAbilityName(name) {
+    return name
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+}
 
 const renderPkmnList = (pkmnList) => {
     pkmnList.forEach(pkmn => renderPkmn(pkmn));
