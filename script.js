@@ -38,8 +38,8 @@ const renderPkmn = (pkmn) => {
     newPkmnContainer.style.backgroundColor = getColorByType(pkmn.types[0].type.name)
 
     const newPkmnName = document.createElement("h5");
-    newPkmnName.className = "pkmnName";
-    newPkmnName.innerHTML = pkmn.name + (pkmn.isShiny ? "��" : "");
+    newPkmnName.className = "pkmnName" + (pkmn.isShiny ? " shinyName" : "");
+    newPkmnName.innerHTML = pkmn.name + (pkmn.isShiny ? " ✮" : "");
     newPkmnContainer.appendChild(newPkmnName);
 
     const newPkmnImg = document.createElement("img");

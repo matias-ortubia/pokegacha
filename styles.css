@@ -88,6 +88,9 @@ main {
 .pkmnName::first-letter {
     text-transform: capitalize;
 }
+.shinyName {
+    color: #EFBF04;
+}
 
 .pkmnImg {
     height: 50rem;
