@@ -3,6 +3,7 @@
 import { getRandomPkmn, getRandomPkmnList } from "./client/pokeapiClient.js";
 import { getPkmnListFromLocalStorage, savePkmnListToLocalStorage } from "./utils/pkmnCacheHelper.js";
 import { sortById } from "./utils/filtersHelper.js";
+import { formatNameWithDash } from "./utils/formatHelper.js"; 
 
 const appContainer = document.getElementById("appContainer");
 
@@ -50,7 +51,7 @@ const renderPkmn = (pkmn, listContainer) => {
 
     const newPkmnAbility = document.createElement("p");
     newPkmnAbility.className = "abilityName";
-    newPkmnAbility.innerHTML = formatAbilityName(pkmn.ability);
+    newPkmnAbility.innerHTML = formatNameWithDash(pkmn.ability);
     newPkmnAbilityContainer.appendChild(newPkmnAbility);
     newPkmnContainer.appendChild(newPkmnAbilityContainer);
 
@@ -60,7 +61,7 @@ const renderPkmn = (pkmn, listContainer) => {
         pkmn.moves.forEach(move => {
             const moveElement = document.createElement("li");
             moveElement.className = "pkmnMove";
-            moveElement.innerHTML = move?.name ?? " ";
+            moveElement.innerHTML = move?.name != null ? formatNameWithDash(move.name) :  " ";
             newPkmnMovesContainer.appendChild(moveElement);
         });
     }
@@ -68,13 +69,6 @@ const renderPkmn = (pkmn, listContainer) => {
 
     listContainer.appendChild(newPkmnContainer);
 };
-
-function formatAbilityName(name) {
-    return name
-        .split('-')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ');
-}
 
 const renderPkmnList = (pkmnList, listContainer) => {
     pkmnList.forEach(pkmn => renderPkmn(pkmn, listContainer));
@@ -154,6 +148,21 @@ function renderObtainedPkmn(listContainer) {
 
 function getColorByType(type) {
     return pkmnColorByTypes[type.toUpperCase()];
+}
+
+const renderFilters = () => {
+    const buttonsContainer = document.createElement("div");
+    buttonsContainer.className = "filtersContainer";
+
+    const sortByIdButton = document.createElement("button");
+    sortByIdButton.className = "sortButton";
+    sortByIdButton.innerHTML = "By ID";
+    sortByIdButton.addEventListener("click", sortById);
+    buttonsContainer.appendChild(sortByIdButton);
+};
+
+function renderMainView() {
+
 }
 
 function renderGachaView(listContainer) {
