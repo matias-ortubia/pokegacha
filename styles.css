@@ -8,6 +8,13 @@ body {
     padding: 0;
 }
 
+#appContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
 header {
     background-color: #e61a23;
     display: flex;
@@ -30,7 +37,28 @@ main {
     padding-bottom: 5rem;
 }
 
-.buttonsContainer {
+#navbar {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    background-color: #000;
+    width: 100%;
+}
+
+.navbarButton {
+    width: 15rem;
+    font-size: 3rem;
+    color: #000;
+    background-color: #FFF;
+    border: none;
+    padding: 1rem;
+    cursor: pointer;
+}
+.navbarButton:hover {
+    background-color: #e2e2e2;
+}
+
+.gachaButtonsContainer {
     display: flex;
     justify-content: center;
     gap: 2rem;
@@ -145,6 +173,11 @@ footer {
 @media screen and (min-width: 1024px) {
     .title {
         font-size: 7rem;
+    }
+
+    .navbarButton {
+        font-size: 2rem;
+        width: 20rem;
     }
 
     .button {

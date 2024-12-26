@@ -2,11 +2,9 @@
 
 import { getRandomPkmn, getRandomPkmnList } from "./client/pokeapiClient.js";
 import { getPkmnListFromLocalStorage, savePkmnListToLocalStorage } from "./utils/pkmnCacheHelper.js";
+import { sortById } from "./utils/filtersHelper.js";
 
-const multiPullButton = document.getElementById("multiPullButton");
-const singlePullButton = document.getElementById("singlePullButton");
-const showObtainedPkmnButton = document.getElementById("showObtainedPokemonButton");
-const pkmnListContainer = document.getElementById("pkmnListContainer");
+const appContainer = document.getElementById("appContainer");
 
 const pkmnColorByTypes = {
     "BUG": "#88950c",
@@ -32,7 +30,7 @@ const pkmnColorByTypes = {
 const obtainedPkmnList = [];
 
 
-const renderPkmn = (pkmn) => {
+const renderPkmn = (pkmn, listContainer) => {
     const newPkmnContainer = document.createElement("div");
     newPkmnContainer.className = "pkmnContainer";
     newPkmnContainer.style.backgroundColor = getColorByType(pkmn.types[0].type.name)
@@ -68,7 +66,7 @@ const renderPkmn = (pkmn) => {
     }
     newPkmnContainer.appendChild(newPkmnMovesContainer);
 
-    pkmnListContainer.appendChild(newPkmnContainer);
+    listContainer.appendChild(newPkmnContainer);
 };
 
 function formatAbilityName(name) {
@@ -78,41 +76,107 @@ function formatAbilityName(name) {
         .join(' ');
 }
 
-const renderPkmnList = (pkmnList) => {
-    pkmnList.forEach(pkmn => renderPkmn(pkmn));
+const renderPkmnList = (pkmnList, listContainer) => {
+    pkmnList.forEach(pkmn => renderPkmn(pkmn, listContainer));
 };
 
-const handleSinglePull = () => {
-    clearShownPkmn();
+function handleSinglePull(listContainer) {
+    clearShownPkmn(listContainer);
     getRandomPkmn().then(pkmn => {
-        renderPkmn(pkmn);
+        renderPkmn(pkmn, listContainer);
         obtainedPkmnList.push({...pkmn});
         savePkmnListToLocalStorage(obtainedPkmnList);
     });
 };
 
-const handleMultiPull = () => {
-    clearShownPkmn();
+function handleMultiPull(listContainer) {
+    clearShownPkmn(listContainer);
     getRandomPkmnList().then(pkmnList => {
-        renderPkmnList(pkmnList);
+        renderPkmnList(pkmnList, listContainer);
         obtainedPkmnList.push(...pkmnList);
         savePkmnListToLocalStorage(obtainedPkmnList);
     });
 };
 
-const clearShownPkmn = () => {
-    while(pkmnListContainer.firstChild) {
-        pkmnListContainer.removeChild(pkmnListContainer.lastChild);
+const clearShownPkmn = (listContainer) => {
+    while(listContainer.firstChild) {
+        listContainer.removeChild(listContainer.lastChild);
     }
 };
 
-const showObtainedPkmn = () => {
-    clearShownPkmn();
-    obtainedPkmnList.forEach(pkmn => renderPkmn(pkmn));
+function clearView() {
+    while(appContainer.firstChild) {
+        appContainer.removeChild(appContainer.lastChild);
+    }
+}
+
+function renderNavbar(listContainer) {
+    const navbar = document.createElement("nav");
+    navbar.id = "navbar";
+
+    const gachaButton = document.createElement("button");
+    gachaButton.innerHTML = "Gacha";
+    gachaButton.className = "navbarButton";
+    gachaButton.addEventListener("click", () => renderGachaView(listContainer));
+    navbar.appendChild(gachaButton);
+
+    const obtainedPkmnButton = document.createElement("button");
+    obtainedPkmnButton.innerHTML = "Obtained Pokemon";
+    obtainedPkmnButton.className = "navbarButton";
+    obtainedPkmnButton.addEventListener("click", () => renderObtainedView(listContainer));
+    navbar.appendChild(obtainedPkmnButton);
+
+    appContainer.appendChild(navbar);
+}
+
+const renderPullButtons = (viewContainer, listContainer) => {
+    const buttonsContainer = document.createElement("div");
+    buttonsContainer.className = "gachaButtonsContainer";
+
+    const singlePullButton = document.createElement("button");
+    singlePullButton.className = "button pull";
+    singlePullButton.innerHTML = "x1 pull";
+    singlePullButton.addEventListener("click", () => handleSinglePull(listContainer));
+    buttonsContainer.appendChild(singlePullButton);
+
+    const multiPullButton = document.createElement("button");
+    multiPullButton.className = "button pull";
+    multiPullButton.innerHTML = "x10 pull";
+    multiPullButton.addEventListener("click", () => handleMultiPull(listContainer));
+    buttonsContainer.appendChild(multiPullButton);
+
+    viewContainer.appendChild(buttonsContainer);
+};
+
+function renderObtainedPkmn(listContainer) {
+    obtainedPkmnList.forEach(pkmn => renderPkmn(pkmn, listContainer));
 };
 
 function getColorByType(type) {
     return pkmnColorByTypes[type.toUpperCase()];
+}
+
+function renderGachaView(listContainer) {
+    clearShownPkmn(listContainer);
+    clearView();
+    const main = document.createElement("main");
+    const viewContainer = document.createElement("div");
+    viewContainer.className = "gachaView";
+
+    renderNavbar(listContainer);
+    renderPullButtons(viewContainer, listContainer);
+    viewContainer.appendChild(listContainer);
+    main.appendChild(viewContainer);
+    appContainer.appendChild(main);
+}
+
+function renderObtainedView(listContainer) {
+    clearShownPkmn(listContainer);
+    clearView();
+    renderNavbar(listContainer);
+
+    renderObtainedPkmn(listContainer);
+    appContainer.appendChild(listContainer);
 }
 
 function loadPkmnListFromLocalStorage() {
@@ -122,12 +186,10 @@ function loadPkmnListFromLocalStorage() {
     }
 }
 
+
+const pkmnListContainer = document.createElement("div");
+pkmnListContainer.id = "pkmnListContainer";
+
 loadPkmnListFromLocalStorage();
-singlePullButton.addEventListener("click", handleSinglePull);
-multiPullButton.addEventListener("click", handleMultiPull);
-showObtainedPkmnButton.addEventListener("click", showObtainedPkmn);
-
-// Para probar, borrar despues
-handleMultiPull();
-
+renderGachaView(pkmnListContainer);
 
