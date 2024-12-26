@@ -33,6 +33,7 @@ export function cachePkmn(pkmn, evolutionChain, pkmnId) {
     const cacheKey = CACHE_KEY_PREFIX + pkmnId;
     const pkmnForCache = buildPkmnForCache(pkmn, evolutionChain);
     const pkmnData = {
+        id: pkmnForCache.id,
         name: pkmnForCache.name,
         types: pkmnForCache.types,
         moves: pkmnForCache.moves,
