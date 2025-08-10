@@ -2,7 +2,7 @@
 
 import { getRandomPkmn, getRandomPkmnList } from "./client/pokeapiClient.js";
 import { getPkmnListFromLocalStorage, savePkmnListToLocalStorage } from "./utils/pkmnCacheHelper.js";
-import { sortById } from "./utils/listHelper.js";
+import { sortById, sortByName, sortByType } from "./utils/listHelper.js";
 import { formatNameWithDash } from "./utils/formatHelper.js"; 
 
 const appContainer = document.getElementById("appContainer");
@@ -160,6 +160,18 @@ const renderFilters = (listContainer) => {
     sortByIdButton.innerHTML = "By ID";
     sortByIdButton.addEventListener("click", () => sortById(obtainedPkmnList, listContainer));
     buttonsContainer.appendChild(sortByIdButton);
+
+    const sortByTypeButton = document.createElement("button");
+    sortByTypeButton.className = "sortButton";
+    sortByTypeButton.innerHTML = "By type";
+    sortByTypeButton.addEventListener("click", () => sortByType(obtainedPkmnList, listContainer));
+    buttonsContainer.appendChild(sortByTypeButton);
+
+    const sortByNameButton = document.createElement("button");
+    sortByNameButton.className = "sortButton";
+    sortByNameButton.innerHTML = "By name";
+    sortByNameButton.addEventListener("click", () => sortByName(obtainedPkmnList, listContainer));
+    buttonsContainer.appendChild(sortByNameButton);
 
     appContainer.appendChild(buttonsContainer);
 };
