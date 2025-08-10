@@ -2,7 +2,7 @@
 
 import { getRandomPkmn, getRandomPkmnList } from "./client/pokeapiClient.js";
 import { getPkmnListFromLocalStorage, savePkmnListToLocalStorage } from "./utils/pkmnCacheHelper.js";
-import { sortById } from "./utils/filtersHelper.js";
+import { sortById } from "./utils/listHelper.js";
 import { formatNameWithDash } from "./utils/formatHelper.js"; 
 
 const appContainer = document.getElementById("appContainer");
@@ -92,7 +92,7 @@ function handleMultiPull(listContainer) {
     });
 };
 
-const clearShownPkmn = (listContainer) => {
+export const clearShownPkmn = (listContainer) => {
     while(listContainer.firstChild) {
         listContainer.removeChild(listContainer.lastChild);
     }
@@ -142,7 +142,8 @@ const renderPullButtons = (viewContainer, listContainer) => {
     viewContainer.appendChild(buttonsContainer);
 };
 
-function renderObtainedPkmn(listContainer) {
+export function renderObtainedPkmn(listContainer) {
+    // TODO: ver si puedo usar renderPkmnList()
     obtainedPkmnList.forEach(pkmn => renderPkmn(pkmn, listContainer));
 };
 
@@ -150,15 +151,17 @@ function getColorByType(type) {
     return pkmnColorByTypes[type.toUpperCase()];
 }
 
-const renderFilters = () => {
+const renderFilters = (listContainer) => {
     const buttonsContainer = document.createElement("div");
     buttonsContainer.className = "filtersContainer";
 
     const sortByIdButton = document.createElement("button");
     sortByIdButton.className = "sortButton";
     sortByIdButton.innerHTML = "By ID";
-    sortByIdButton.addEventListener("click", sortById);
+    sortByIdButton.addEventListener("click", () => sortById(obtainedPkmnList, listContainer));
     buttonsContainer.appendChild(sortByIdButton);
+
+    appContainer.appendChild(buttonsContainer);
 };
 
 function renderMainView() {
@@ -183,6 +186,7 @@ function renderObtainedView(listContainer) {
     clearShownPkmn(listContainer);
     clearView();
     renderNavbar(listContainer);
+    renderFilters(listContainer);
 
     renderObtainedPkmn(listContainer);
     appContainer.appendChild(listContainer);
