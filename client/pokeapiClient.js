@@ -4,7 +4,6 @@ import { getPkmnEvolutions, getPkmnPreEvolution, getPkmnEvolutionStage } from ".
 const MAX_POKEMON = 151;
 const SHINY_CHANCE = 4096;
 
-
 const buildPkmn = (pkmn, moves, preEvolution, evolutions, evolutionStage, isShiny) => {
     return {
         id: pkmn.id,
