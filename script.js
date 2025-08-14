@@ -152,28 +152,69 @@ function getColorByType(type) {
 }
 
 const renderFilters = (listContainer) => {
-    const buttonsContainer = document.createElement("div");
-    buttonsContainer.className = "filtersContainer";
+    const listControlsContainer = document.createElement("div");
+    listControlsContainer.className = "listControlsContainer";
 
+    const sortingContainer = document.createElement("div");
+    sortingContainer.className = "sortingContainer";
+
+    const sortingSelector = document.createElement("select");
+    sortingSelector.id = "sortingSelector";
+    sortingSelector.className = "sortingSelector";
+    
+    const placeHolder = document.createElement("option");
+    placeHolder.value = "";
+    placeHolder.innerHTML = "Sort by";
+    sortingSelector.appendChild(placeHolder);
+
+    const sortByIdOption = document.createElement("option");
+    sortByIdOption.value = "byId";
+    sortByIdOption.innerHTML = "By ID";
+    sortingSelector.appendChild(sortByIdOption);
+
+    const sortByTypeOption = document.createElement("option");
+    sortByTypeOption.value = "byType";
+    sortByTypeOption.innerHTML = "By Type";
+    sortingSelector.appendChild(sortByTypeOption);
+
+    const sortByNameOption = document.createElement("option");
+    sortByNameOption.value = "byName";
+    sortByNameOption.innerHTML = "By Name";
+    sortingSelector.appendChild(sortByNameOption);
+
+    sortingSelector.addEventListener("change", (event) => {
+        if (event.target.value === "byId") {
+            sortById(obtainedPkmnList, listContainer);
+        } else if (event.target.value === "byType") {
+            sortByType(obtainedPkmnList, listContainer);
+        } else if (event.target.value === "byName") {
+            sortByName(obtainedPkmnList, listContainer);
+        }
+    });    
+
+    sortingContainer.appendChild(sortingSelector);
+    listControlsContainer.appendChild(sortingContainer);
+
+/*
     const sortByIdButton = document.createElement("button");
     sortByIdButton.className = "sortButton";
     sortByIdButton.innerHTML = "By ID";
     sortByIdButton.addEventListener("click", () => sortById(obtainedPkmnList, listContainer));
-    buttonsContainer.appendChild(sortByIdButton);
+    sortContainer.appendChild(sortByIdButton);
 
     const sortByTypeButton = document.createElement("button");
     sortByTypeButton.className = "sortButton";
     sortByTypeButton.innerHTML = "By type";
     sortByTypeButton.addEventListener("click", () => sortByType(obtainedPkmnList, listContainer));
-    buttonsContainer.appendChild(sortByTypeButton);
+    sortContainer.appendChild(sortByTypeButton);
 
     const sortByNameButton = document.createElement("button");
     sortByNameButton.className = "sortButton";
     sortByNameButton.innerHTML = "By name";
     sortByNameButton.addEventListener("click", () => sortByName(obtainedPkmnList, listContainer));
-    buttonsContainer.appendChild(sortByNameButton);
-
-    appContainer.appendChild(buttonsContainer);
+    sortContainer.appendChild(sortByNameButton);
+*/
+    appContainer.appendChild(listControlsContainer);
 };
 
 function renderMainView() {

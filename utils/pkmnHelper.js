@@ -20,9 +20,3 @@ export function getPkmnIdFromUrl(url) {
     const parts = url.split('/');
     return parts[parts.length - 2];
 }
-
-    // TODO
-export function getTier(rarityNum) {
-    // Segun el num, dice si es R, SR, S, SS
-    TODO
-}

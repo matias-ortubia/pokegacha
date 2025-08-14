@@ -37,7 +37,6 @@ export function sortByType(pkmnList, listContainer) {
     };
 
     pkmnList.sort(cmpByType);
-    console.log(pkmnList);
     clearShownPkmn(listContainer);
     renderObtainedPkmn(listContainer);
 }
